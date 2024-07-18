@@ -31,7 +31,6 @@ jobs:
 
       - name: Write key
         run: |
-        echo buildWithGitSuffix=true >> local.properties
           echo storePassword=password >> local.properties
           echo keyAlias=alias >> local.properties
           echo keyPassword=password >> local.properties
