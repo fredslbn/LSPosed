@@ -63,14 +63,6 @@ jobs:
         with:
           gradle-home-cache-cleanup: true
 
-      - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          max-size: 2G
-          key: ${{ runner.os }}
-          restore-keys: ${{ runner.os }}
-          save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/npm-open' }}
-
       - name: Build dependencies
         working-directory: libxposed
         run: |
