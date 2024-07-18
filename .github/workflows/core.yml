@@ -30,15 +30,14 @@ jobs:
           fetch-depth: 0
 
       - name: Write key
-        if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/master' ) || github.ref_type == 'tag' }}
         run: |
-          if [ ! -z "${{ secrets.KEY_STORE }}" ]; then
-            echo androidStorePassword='${{ secrets.KEY_STORE_PASSWORD }}' >> gradle.properties
-            echo androidKeyAlias='${{ secrets.ALIAS }}' >> gradle.properties
-            echo androidKeyPassword='${{ secrets.KEY_PASSWORD }}' >> gradle.properties
-            echo androidStoreFile='key.jks' >> gradle.properties
-            echo ${{ secrets.KEY_STORE }} | base64 --decode > key.jks
-          fi
+        echo buildWithGitSuffix=true >> local.properties
+          echo storePassword=password >> local.properties
+          echo keyAlias=alias >> local.properties
+          echo keyPassword=password >> local.properties
+          echo fileDir=`pwd`/key.jks >> local.properties
+          keytool -genkey -dname "cn=A, ou=D, o=G, l=P, st=M, c=I" -keystore key.jks -storepass password -alias alias -keyalg RSA -keysize 4096 -validity 10000
+
 
       - name: Checkout libxposed/api
         uses: actions/checkout@v3
@@ -62,6 +61,15 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-home-cache-cleanup: true
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          max-size: 2G
+          key: ${{ runner.os }}
+          restore-keys: ${{ runner.os }}
+          save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/npm-open' }}
+
 
       - name: Build dependencies
         working-directory: libxposed
